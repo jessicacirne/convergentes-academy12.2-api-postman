@@ -1,0 +1,51 @@
+{
+	"id": "1053f2c4-b429-415a-8829-d35a2b256e4f",
+	"values": [
+		{
+			"key": "Url",
+			"value": "https://black-list.qacoders.dev.br/api/",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "TokenProvider",
+			"value": "",
+			"type": "any",
+			"enabled": true
+		},
+		{
+			"key": "tokenAdmin",
+			"value": "",
+			"type": "any",
+			"enabled": true
+		},
+		{
+			"key": "schema",
+			"value": "",
+			"type": "any",
+			"enabled": true
+		},
+		{
+			"key": "nome",
+			"value": "",
+			"type": "any",
+			"enabled": true
+		},
+		{
+			"key": "email",
+			"value": "",
+			"type": "any",
+			"enabled": true
+		},
+		{
+			"key": "cpf",
+			"value": "",
+			"type": "any",
+			"enabled": true
+		}
+	],
+	"name": "Globals",
+	"_postman_variable_scope": "globals",
+	"_postman_exported_at": "2024-11-11T23:02:35.254Z",
+	"_postman_exported_using": "Postman/11.19.0"
+}

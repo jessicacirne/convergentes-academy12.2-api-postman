@@ -1,0 +1,2307 @@
+{
+	"info": {
+		"_postman_id": "07e3bd12-7ec8-4df7-8d4d-37e895a83ccf",
+		"name": "Feature - User",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "25008796"
+	},
+	"item": [
+		{
+			"name": "Login de Admin - Autenticação",
+			"item": [
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.globals.set(\"TokenProvider\", pm.response.json().token)\r",
+									"pm.environment.set(\"TokenProvider\", pm.response.json().token)"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "value",
+									"value": "{{TokenProvider}}",
+									"type": "string"
+								},
+								{
+									"key": "key",
+									"value": "Authorization",
+									"type": "string"
+								},
+								{
+									"key": "in",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"mail\": \"{{MailLoginAuth}}\",\r\n  \"password\": \"{{PasswordLoginAuth}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{Url}}/login/",
+							"host": [
+								"{{Url}}"
+							],
+							"path": [
+								"login",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Para acessar a API é necessário realizar o login como administrador para autenticação obrigatória."
+		},
+		{
+			"name": "1_Novo cadastro de Login",
+			"item": [
+				{
+					"name": "CN1: Validar novo cadastro com sucesso",
+					"item": [
+						{
+							"name": "CT1.1.1: Novo cadastro de usuário com sucesso",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code 201 - Created\", function () {\r",
+											"  pm.response.to.have.status(201);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Mensagem informativa de sucesso é exibida\", function () {\r",
+											"const responseBody = pm.response.json();\r",
+											"    pm.expect(responseBody.msg).to.include(\"sucesso\");\r",
+											"});\r",
+											"\r",
+											"pm.environment.set(\"USER_ID\", pm.response.json().user._id);\r",
+											"\r",
+											"pm.test(\"Novo cadastro de usuário foi dicionado\", function () {\r",
+											"    pm.expect(pm.response.json().user._id).to.exist;\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "apikey",
+									"apikey": [
+										{
+											"key": "value",
+											"value": "{{TokenProvider}}",
+											"type": "string"
+										},
+										{
+											"key": "key",
+											"value": "Authorization",
+											"type": "string"
+										},
+										{
+											"key": "in",
+											"value": "header",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"fullName\": \"{{NOME_COMPOSTO}}\",\r\n    \"mail\": \"{{EMAIL}}\",\r\n    \"password\": \"1234@Test\",\r\n    \"accessProfile\": \"ADMIN\",\r\n    \"cpf\": \"{{CPF}}\",\r\n    \"confirmPassword\": \"1234@Test\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{Url}}user",
+									"host": [
+										"{{Url}}user"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Verifica se a company foi criada",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"auth": {
+									"type": "apikey",
+									"apikey": [
+										{
+											"key": "value",
+											"value": "{{tokenAdmin}}",
+											"type": "string"
+										},
+										{
+											"key": "in",
+											"value": "header",
+											"type": "string"
+										},
+										{
+											"key": "key",
+											"value": "Authorization",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{Url}}user/",
+									"host": [
+										"{{Url}}user"
+									],
+									"path": [
+										""
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "CN2: Validações de campos obrigatórios",
+					"item": [
+						{
+							"name": "CT1.2.1: Cadastro com campos vazios",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code 400 - Bad Request\", function () {\r",
+											"  pm.response.to.have.status(400);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"O corpo da resposta contém os erros esperados\", function () {\r",
+											"    const responseBody = pm.response.json();\r",
+											"    const expectedErrors = [\r",
+											"        \"O campo nome completo é obrigatório.\",\r",
+											"        \"O campo e-mail é obrigatório.\",\r",
+											"        \"O campo senha é obrigatório\",\r",
+											"        \"O campo CPF é obrigatório!\",\r",
+											"        \"O campo perfil de acesso é obrigatório.\",\r",
+											"        \"O campo de confirmação de senha é obrigatório.\"\r",
+											"    ];\r",
+											"\r",
+											"    pm.expect(responseBody.error).to.eql(expectedErrors);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "apikey",
+									"apikey": [
+										{
+											"key": "value",
+											"value": "{{TokenProvider}}",
+											"type": "string"
+										},
+										{
+											"key": "key",
+											"value": "Authorization",
+											"type": "string"
+										},
+										{
+											"key": "in",
+											"value": "header",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"fullName\": \"\",\r\n  \"mail\": \"\",\r\n  \"password\": \"\",\r\n  \"accessProfile\": \"\",\r\n  \"cpf\": \"\",\r\n  \"confirmPassword\": \"\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{Url}}user",
+									"host": [
+										"{{Url}}user"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "CN3: Validações do campo 'Nome Completo'",
+					"item": [
+						{
+							"name": "CT1.3.1: FullName com mais de 100 caracteres",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code 400 - Bad Request\", function () {\r",
+											"  pm.response.to.have.status(400);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"O corpo da resposta contém 'error' com uma mensagem informativa\", function () {\r",
+											"    const responseBody = pm.response.json();\r",
+											"    \r",
+											"    pm.expect(responseBody).to.have.property(\"error\").that.is.an(\"array\");\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "apikey",
+									"apikey": [
+										{
+											"key": "value",
+											"value": "{{TokenProvider}}",
+											"type": "string"
+										},
+										{
+											"key": "key",
+											"value": "Authorization",
+											"type": "string"
+										},
+										{
+											"key": "in",
+											"value": "header",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"fullName\": \"Alexanderson Maximiliano de Albuquerque Pereira da Silva Costa e Souza Oliveira dos Santos Monteiro Neto\",\r\n  \"mail\": \"{{EMAIL}}\",\r\n  \"password\": \"1234@Test\",\r\n  \"accessProfile\": \"ADMIN\",\r\n  \"cpf\": \"{{CPF}}\",\r\n  \"confirmPassword\": \"1234@Test\"\r\n}\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{Url}}user",
+									"host": [
+										"{{Url}}user"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "CT1.3.2: FullName incluindo números",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code 400 - Bad Request\", function () {\r",
+											"  pm.response.to.have.status(400);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"O corpo da resposta contém 'error' com uma mensagem informativa\", function () {\r",
+											"    const responseBody = pm.response.json();\r",
+											"    \r",
+											"    pm.expect(responseBody).to.have.property(\"error\").that.is.an(\"array\");\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "apikey",
+									"apikey": [
+										{
+											"key": "value",
+											"value": "{{TokenProvider}}",
+											"type": "string"
+										},
+										{
+											"key": "key",
+											"value": "Authorization",
+											"type": "string"
+										},
+										{
+											"key": "in",
+											"value": "header",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"fullName\": \"Teste Testando7\",\r\n  \"mail\": \"{{EMAIL}}\",\r\n  \"password\": \"1234@Test\",\r\n  \"accessProfile\": \"ADMIN\",\r\n  \"cpf\": \"{{CPF}}\",\r\n  \"confirmPassword\": \"1234@Test\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{Url}}user",
+									"host": [
+										"{{Url}}user"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "CT1.3.3: FullName incluindo caracteres especiais",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code 400 - Bad Request\", function () {\r",
+											"  pm.response.to.have.status(400);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"O corpo da resposta contém 'error' com uma mensagem informativa\", function () {\r",
+											"    const responseBody = pm.response.json();\r",
+											"    \r",
+											"    pm.expect(responseBody).to.have.property(\"error\").that.is.an(\"array\");\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "apikey",
+									"apikey": [
+										{
+											"key": "value",
+											"value": "{{TokenProvider}}",
+											"type": "string"
+										},
+										{
+											"key": "key",
+											"value": "Authorization",
+											"type": "string"
+										},
+										{
+											"key": "in",
+											"value": "header",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"fullName\": \"Teste Testando@\",\r\n  \"mail\": \"{{EMAIL}}\",\r\n  \"password\": \"1234@Test\",\r\n  \"accessProfile\": \"ADMIN\",\r\n  \"cpf\": \"{{CPF}}\",\r\n  \"confirmPassword\": \"1234@Test\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{Url}}user",
+									"host": [
+										"{{Url}}user"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "CT1.3.4: FullName sem palavra composta",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code 400 - Bad Request\", function () {\r",
+											"  pm.response.to.have.status(400);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"O corpo da resposta contém 'error' com uma mensagem informativa\", function () {\r",
+											"    const responseBody = pm.response.json();\r",
+											"    \r",
+											"    pm.expect(responseBody).to.have.property(\"error\").that.is.an(\"array\");\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "apikey",
+									"apikey": [
+										{
+											"key": "value",
+											"value": "{{TokenProvider}}",
+											"type": "string"
+										},
+										{
+											"key": "key",
+											"value": "Authorization",
+											"type": "string"
+										},
+										{
+											"key": "in",
+											"value": "header",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"fullName\": \"Teste\",\r\n  \"mail\": \"{{EMAIL}}\",\r\n  \"password\": \"1234@Test\",\r\n  \"accessProfile\": \"ADMIN\",\r\n  \"cpf\": \"{{CPF}}\",\r\n  \"confirmPassword\": \"1234@Test\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{Url}}user",
+									"host": [
+										"{{Url}}user"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "CN4: Validações do campo 'E-mail'",
+					"item": [
+						{
+							"name": "CT1.4.1: Mail fora do formato",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code 400 - Bad Request\", function () {\r",
+											"  pm.response.to.have.status(400);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"O corpo da resposta contém 'error' com uma mensagem informativa\", function () {\r",
+											"    const responseBody = pm.response.json();\r",
+											"    \r",
+											"    pm.expect(responseBody).to.have.property(\"error\").that.is.an(\"array\");\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "apikey",
+									"apikey": [
+										{
+											"key": "value",
+											"value": "{{TokenProvider}}",
+											"type": "string"
+										},
+										{
+											"key": "key",
+											"value": "Authorization",
+											"type": "string"
+										},
+										{
+											"key": "in",
+											"value": "header",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"fullName\": \"{{NOME_COMPOSTO}}\",\r\n  \"mail\": \"testando.com.br\",\r\n  \"password\": \"1234@Test\",\r\n  \"accessProfile\": \"ADMIN\",\r\n  \"cpf\": \"{{CPF}}\",\r\n  \"confirmPassword\": \"1234@Test\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{Url}}user",
+									"host": [
+										"{{Url}}user"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "CN5: Validações do campo 'Senha'",
+					"item": [
+						{
+							"name": "CT1.5.1: Password com menos de 8 ou mais de 12 caracteres",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code 400 - Bad Request\", function () {\r",
+											"  pm.response.to.have.status(400);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"O corpo da resposta contém 'error' com uma mensagem informativa\", function () {\r",
+											"    const responseBody = pm.response.json();\r",
+											"    \r",
+											"    pm.expect(responseBody).to.have.property(\"error\").that.is.an(\"array\");\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "apikey",
+									"apikey": [
+										{
+											"key": "value",
+											"value": "{{TokenProvider}}",
+											"type": "string"
+										},
+										{
+											"key": "key",
+											"value": "Authorization",
+											"type": "string"
+										},
+										{
+											"key": "in",
+											"value": "header",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"fullName\": \"{{NOME_COMPOSTO}}\",\r\n  \"mail\": \"{{EMAIL}}\",\r\n  \"password\": \"12@Test\",\r\n  \"accessProfile\": \"ADMIN\",\r\n  \"cpf\": \"{{CPF}}\",\r\n  \"confirmPassword\": \"12@Test\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{Url}}user",
+									"host": [
+										"{{Url}}user"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "CT1.5.2: Password sem incluir letra maiúscula",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code 400 - Bad Request\", function () {\r",
+											"  pm.response.to.have.status(400);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"O corpo da resposta contém 'error' com uma mensagem informativa\", function () {\r",
+											"    const responseBody = pm.response.json();\r",
+											"    \r",
+											"    pm.expect(responseBody).to.have.property(\"error\").that.is.an(\"array\");\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "apikey",
+									"apikey": [
+										{
+											"key": "value",
+											"value": "{{TokenProvider}}",
+											"type": "string"
+										},
+										{
+											"key": "key",
+											"value": "Authorization",
+											"type": "string"
+										},
+										{
+											"key": "in",
+											"value": "header",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"fullName\": \"{{NOME_COMPOSTO}}\",\r\n  \"mail\": \"{{EMAIL}}\",\r\n  \"password\": \"1234@test\",\r\n  \"accessProfile\": \"ADMIN\",\r\n  \"cpf\": \"{{CPF}}\",\r\n  \"confirmPassword\": \"1234@test\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{Url}}user",
+									"host": [
+										"{{Url}}user"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "CT1.5.3: Password sem incluir letra minúscula",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code 400 - Bad Request\", function () {\r",
+											"  pm.response.to.have.status(400);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"O corpo da resposta contém 'error' com uma mensagem informativa\", function () {\r",
+											"    const responseBody = pm.response.json();\r",
+											"    \r",
+											"    pm.expect(responseBody).to.have.property(\"error\").that.is.an(\"array\");\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "apikey",
+									"apikey": [
+										{
+											"key": "value",
+											"value": "{{TokenProvider}}",
+											"type": "string"
+										},
+										{
+											"key": "key",
+											"value": "Authorization",
+											"type": "string"
+										},
+										{
+											"key": "in",
+											"value": "header",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"fullName\": \"{{NOME_COMPOSTO}}\",\r\n  \"mail\": \"{{EMAIL}}\",\r\n  \"password\": \"1234@TEST\",\r\n  \"accessProfile\": \"ADMIN\",\r\n  \"cpf\": \"{{CPF}}\",\r\n  \"confirmPassword\": \"1234@TEST\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{Url}}user",
+									"host": [
+										"{{Url}}user"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "CT1.5.4: Password sem incluir números",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code 400 - Bad Request\", function () {\r",
+											"  pm.response.to.have.status(400);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"O corpo da resposta contém 'error' com uma mensagem informativa\", function () {\r",
+											"    const responseBody = pm.response.json();\r",
+											"    \r",
+											"    pm.expect(responseBody).to.have.property(\"error\").that.is.an(\"array\");\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "apikey",
+									"apikey": [
+										{
+											"key": "value",
+											"value": "{{TokenProvider}}",
+											"type": "string"
+										},
+										{
+											"key": "key",
+											"value": "Authorization",
+											"type": "string"
+										},
+										{
+											"key": "in",
+											"value": "header",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"fullName\": \"{{NOME_COMPOSTO}}\",\r\n  \"mail\": \"{{EMAIL}}\",\r\n  \"password\": \"abcd@Test\",\r\n  \"accessProfile\": \"ADMIN\",\r\n  \"cpf\": \"{{CPF}}\",\r\n  \"confirmPassword\": \"abcd@Test\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{Url}}user",
+									"host": [
+										"{{Url}}user"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "CT1.5.5: Password sem incluir caracteres especiaisPassword sem incluir números Copy",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code 400 - Bad Request\", function () {\r",
+											"  pm.response.to.have.status(400);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"O corpo da resposta contém 'error' com uma mensagem informativa\", function () {\r",
+											"    const responseBody = pm.response.json();\r",
+											"    \r",
+											"    pm.expect(responseBody).to.have.property(\"error\").that.is.an(\"array\");\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "apikey",
+									"apikey": [
+										{
+											"key": "value",
+											"value": "{{TokenProvider}}",
+											"type": "string"
+										},
+										{
+											"key": "key",
+											"value": "Authorization",
+											"type": "string"
+										},
+										{
+											"key": "in",
+											"value": "header",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"fullName\": \"{{NOME_COMPOSTO}}\",\r\n  \"mail\": \"{{EMAIL}}\",\r\n  \"password\": \"12345Test\",\r\n  \"accessProfile\": \"ADMIN\",\r\n  \"cpf\": \"{{CPF}}\",\r\n  \"confirmPassword\": \"12345Test\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{Url}}user",
+									"host": [
+										"{{Url}}user"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "CN7:  Validações do campo 'Confirmar senha'",
+					"item": [
+						{
+							"name": "CT1.7.1: ConfirmPassword diferente de Password",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code 400 - Bad Request\", function () {\r",
+											"  pm.response.to.have.status(400);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"O corpo da resposta contém 'error' com uma mensagem informativa\", function () {\r",
+											"    const responseBody = pm.response.json();\r",
+											"    \r",
+											"    pm.expect(responseBody).to.have.property(\"error\").that.is.an(\"array\");\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "apikey",
+									"apikey": [
+										{
+											"key": "value",
+											"value": "{{TokenProvider}}",
+											"type": "string"
+										},
+										{
+											"key": "key",
+											"value": "Authorization",
+											"type": "string"
+										},
+										{
+											"key": "in",
+											"value": "header",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"fullName\": \"{{NOME_COMPOSTO}}\",\r\n  \"mail\": \"{{EMAIL}}\",\r\n  \"password\": \"1234@Test\",\r\n  \"accessProfile\": \"ADMIN\",\r\n  \"cpf\": \"{{CPF}}\",\r\n  \"confirmPassword\": \"Test@1234\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{Url}}user",
+									"host": [
+										"{{Url}}user"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "2_Editar cadastro de Login",
+			"item": [
+				{
+					"name": "CN1: Validar edição de cadastro com sucesso",
+					"item": [
+						{
+							"name": "CT2.1.1: Edição de cadastro de usuário com sucesso",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code 200 - OK\", function () {\r",
+											"  pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Mensagem de sucesso está correta\", function () {\r",
+											"    const responseBody = pm.response.json();\r",
+											"    pm.expect(responseBody.msg).to.eql(\"Dados atualizados com sucesso!\");\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "apikey",
+									"apikey": [
+										{
+											"key": "in",
+											"value": "header",
+											"type": "string"
+										},
+										{
+											"key": "value",
+											"value": "{{TokenProvider}}",
+											"type": "string"
+										},
+										{
+											"key": "key",
+											"value": "Authorization",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"fullName\": \"{{NOME_COMPOSTO}}\",\r\n  \"mail\": \"{{EMAIL}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{Url}}user/{{USER_ID}}",
+									"host": [
+										"{{Url}}user"
+									],
+									"path": [
+										"{{USER_ID}}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "CN2: Validar edição de campos obrigatórios",
+					"item": [
+						{
+							"name": "CT1.2.1: Edição de cadastro com campos vazios",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code 200 - OK\", function () {\r",
+											"  pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Mensagem de sucesso está correta\", function () {\r",
+											"    const responseBody = pm.response.json();\r",
+											"    pm.expect(responseBody.msg).to.eql(\"Dados atualizados com sucesso!\");\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "apikey",
+									"apikey": [
+										{
+											"key": "in",
+											"value": "header",
+											"type": "string"
+										},
+										{
+											"key": "value",
+											"value": "{{TokenProvider}}",
+											"type": "string"
+										},
+										{
+											"key": "key",
+											"value": "Authorization",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"fullName\": \"\",\r\n  \"mail\": \"\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{Url}}user/{{USER_ID}}?token={{TokenProvider}}",
+									"host": [
+										"{{Url}}user"
+									],
+									"path": [
+										"{{USER_ID}}"
+									],
+									"query": [
+										{
+											"key": "token",
+											"value": "{{TokenProvider}}"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "CN3: Validações de edição do campo 'Nome Completo'",
+					"item": [
+						{
+							"name": "CT2.3.1: Edição de fullName com mais de 100 caracteres",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code 200 - OK\", function () {\r",
+											"  pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Mensagem de sucesso está correta\", function () {\r",
+											"    const responseBody = pm.response.json();\r",
+											"    pm.expect(responseBody.msg).to.eql(\"Dados atualizados com sucesso!\");\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "apikey",
+									"apikey": [
+										{
+											"key": "in",
+											"value": "header",
+											"type": "string"
+										},
+										{
+											"key": "value",
+											"value": "{{TokenProvider}}",
+											"type": "string"
+										},
+										{
+											"key": "key",
+											"value": "Authorization",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"fullName\": \"Alexanderson Maximiliano de Albuquerque Pereira da Silva Costa e Souza Oliveira dos Santos Monteiro Neto\",\r\n  \"mail\": \"{{EMAIL}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{Url}}user/{{USER_ID}}?token={{TokenProvider}}",
+									"host": [
+										"{{Url}}user"
+									],
+									"path": [
+										"{{USER_ID}}"
+									],
+									"query": [
+										{
+											"key": "token",
+											"value": "{{TokenProvider}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "CT2.3.2: Edição de fullName incluindo números",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code 200 - OK\", function () {\r",
+											"  pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Mensagem de sucesso está correta\", function () {\r",
+											"    const responseBody = pm.response.json();\r",
+											"    pm.expect(responseBody.msg).to.eql(\"Dados atualizados com sucesso!\");\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "apikey",
+									"apikey": [
+										{
+											"key": "in",
+											"value": "header",
+											"type": "string"
+										},
+										{
+											"key": "value",
+											"value": "{{TokenProvider}}",
+											"type": "string"
+										},
+										{
+											"key": "key",
+											"value": "Authorization",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"fullName\": \"Teste Testando7\",\r\n  \"mail\": \"{{EMAIL}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{Url}}user/{{USER_ID}}?token={{TokenProvider}}",
+									"host": [
+										"{{Url}}user"
+									],
+									"path": [
+										"{{USER_ID}}"
+									],
+									"query": [
+										{
+											"key": "token",
+											"value": "{{TokenProvider}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "CT2.3.3: Edição de fullName incluindo caracteres especiais",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code 200 - OK\", function () {\r",
+											"  pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Mensagem de sucesso está correta\", function () {\r",
+											"    const responseBody = pm.response.json();\r",
+											"    pm.expect(responseBody.msg).to.eql(\"Dados atualizados com sucesso!\");\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "apikey",
+									"apikey": [
+										{
+											"key": "in",
+											"value": "header",
+											"type": "string"
+										},
+										{
+											"key": "value",
+											"value": "{{TokenProvider}}",
+											"type": "string"
+										},
+										{
+											"key": "key",
+											"value": "Authorization",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"fullName\": \"Teste Testando@\",\r\n  \"mail\": \"{{EMAIL}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{Url}}user/{{USER_ID}}?token={{TokenProvider}}",
+									"host": [
+										"{{Url}}user"
+									],
+									"path": [
+										"{{USER_ID}}"
+									],
+									"query": [
+										{
+											"key": "token",
+											"value": "{{TokenProvider}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "CT2.3.4: Edição de fullName sem palavra composta",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code 200 - OK\", function () {\r",
+											"  pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Mensagem de sucesso está correta\", function () {\r",
+											"    const responseBody = pm.response.json();\r",
+											"    pm.expect(responseBody.msg).to.eql(\"Dados atualizados com sucesso!\");\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "apikey",
+									"apikey": [
+										{
+											"key": "in",
+											"value": "header",
+											"type": "string"
+										},
+										{
+											"key": "value",
+											"value": "{{TokenProvider}}",
+											"type": "string"
+										},
+										{
+											"key": "key",
+											"value": "Authorization",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"fullName\": \"Teste\",\r\n  \"mail\": \"{{EMAIL}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{Url}}user/{{USER_ID}}?token={{TokenProvider}}",
+									"host": [
+										"{{Url}}user"
+									],
+									"path": [
+										"{{USER_ID}}"
+									],
+									"query": [
+										{
+											"key": "token",
+											"value": "{{TokenProvider}}"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "CN4: Validações de edição do campo 'E-mail'",
+					"item": [
+						{
+							"name": "CT2.4.1: Edição de mail fora do formato",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code 200 - OK\", function () {\r",
+											"  pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Mensagem de sucesso está correta\", function () {\r",
+											"    const responseBody = pm.response.json();\r",
+											"    pm.expect(responseBody.msg).to.eql(\"Dados atualizados com sucesso!\");\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "apikey",
+									"apikey": [
+										{
+											"key": "in",
+											"value": "header",
+											"type": "string"
+										},
+										{
+											"key": "value",
+											"value": "{{TokenProvider}}",
+											"type": "string"
+										},
+										{
+											"key": "key",
+											"value": "Authorization",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"fullName\": \"{{NOME_COMPOSTO}}\",\r\n  \"mail\": \"testando.com.br\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{Url}}user/{{USER_ID}}?token={{TokenProvider}}",
+									"host": [
+										"{{Url}}user"
+									],
+									"path": [
+										"{{USER_ID}}"
+									],
+									"query": [
+										{
+											"key": "token",
+											"value": "{{TokenProvider}}"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "CN5: Validações do campo 'Senha'",
+					"item": [
+						{
+							"name": "CT2.5.1: Editar password com menos de 8 ou mais de 12 caracteres",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code 400 - OK\", function () {\r",
+											"  pm.response.to.have.status(400);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Verificar se a resposta não contém a mensagem de erro de permissão\", function () {\r",
+											"    const respostaJson = pm.response.json();\r",
+											"    pm.expect(respostaJson.msg).not.to.eql(\"Você não tem permissão para esta função.\");\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "apikey",
+									"apikey": [
+										{
+											"key": "in",
+											"value": "header",
+											"type": "string"
+										},
+										{
+											"key": "value",
+											"value": "{{TokenProvider}}",
+											"type": "string"
+										},
+										{
+											"key": "key",
+											"value": "Authorization",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"password\": \"1234@T\",\r\n  \"confirmPassword\": \"1234@T\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{Url}}user/password/{{USER_ID}}",
+									"host": [
+										"{{Url}}user"
+									],
+									"path": [
+										"password",
+										"{{USER_ID}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "CT2.5.2: Editar password sem incluir letra maiúscula",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code 400 - OK\", function () {\r",
+											"  pm.response.to.have.status(400);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Verificar se a resposta não contém a mensagem de erro de permissão\", function () {\r",
+											"    const respostaJson = pm.response.json();\r",
+											"    pm.expect(respostaJson.msg).not.to.eql(\"Você não tem permissão para esta função.\");\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "apikey",
+									"apikey": [
+										{
+											"key": "in",
+											"value": "header",
+											"type": "string"
+										},
+										{
+											"key": "value",
+											"value": "{{TokenProvider}}",
+											"type": "string"
+										},
+										{
+											"key": "key",
+											"value": "Authorization",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"password\": \"1234@test\",\r\n  \"confirmPassword\": \"1234@test\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{Url}}user/password/{{USER_ID}}",
+									"host": [
+										"{{Url}}user"
+									],
+									"path": [
+										"password",
+										"{{USER_ID}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "CT2.5.3: Editar password sem incluir letra minúscula",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code 400 - OK\", function () {\r",
+											"  pm.response.to.have.status(400);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Verificar se a resposta não contém a mensagem de erro de permissão\", function () {\r",
+											"    const respostaJson = pm.response.json();\r",
+											"    pm.expect(respostaJson.msg).not.to.eql(\"Você não tem permissão para esta função.\");\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "apikey",
+									"apikey": [
+										{
+											"key": "in",
+											"value": "header",
+											"type": "string"
+										},
+										{
+											"key": "value",
+											"value": "{{TokenProvider}}",
+											"type": "string"
+										},
+										{
+											"key": "key",
+											"value": "Authorization",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"password\": \"1234@TESTE\",\r\n  \"confirmPassword\": \"1234@TESTE\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{Url}}user/password/{{USER_ID}}",
+									"host": [
+										"{{Url}}user"
+									],
+									"path": [
+										"password",
+										"{{USER_ID}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "CT2.5.4: Editar password sem incluir números",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code 400 - OK\", function () {\r",
+											"  pm.response.to.have.status(400);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Verificar se a resposta não contém a mensagem de erro de permissão\", function () {\r",
+											"    const respostaJson = pm.response.json();\r",
+											"    pm.expect(respostaJson.msg).not.to.eql(\"Você não tem permissão para esta função.\");\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "apikey",
+									"apikey": [
+										{
+											"key": "in",
+											"value": "header",
+											"type": "string"
+										},
+										{
+											"key": "value",
+											"value": "{{TokenProvider}}",
+											"type": "string"
+										},
+										{
+											"key": "key",
+											"value": "Authorization",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"password\": \"abcd@Test\",\r\n  \"confirmPassword\": \"abcd@Test\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{Url}}user/password/{{USER_ID}}",
+									"host": [
+										"{{Url}}user"
+									],
+									"path": [
+										"password",
+										"{{USER_ID}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "CT2.5.5: Editar password sem incluir caracteres especiais",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code 400 - OK\", function () {\r",
+											"  pm.response.to.have.status(400);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Verificar se a resposta não contém a mensagem de erro de permissão\", function () {\r",
+											"    const respostaJson = pm.response.json();\r",
+											"    pm.expect(respostaJson.msg).not.to.eql(\"Você não tem permissão para esta função.\");\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "apikey",
+									"apikey": [
+										{
+											"key": "in",
+											"value": "header",
+											"type": "string"
+										},
+										{
+											"key": "value",
+											"value": "{{TokenProvider}}",
+											"type": "string"
+										},
+										{
+											"key": "key",
+											"value": "Authorization",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"password\": \"12345Test\",\r\n  \"confirmPassword\": \"12345Test\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{Url}}user/password/{{USER_ID}}",
+									"host": [
+										"{{Url}}user"
+									],
+									"path": [
+										"password",
+										"{{USER_ID}}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "CN6: Validações de edição do campo 'Confirmar senha'",
+					"item": [
+						{
+							"name": "CT2.6.1: ConfirmPassword diferente de Password",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code 400 - OK\", function () {\r",
+											"  pm.response.to.have.status(400);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Verificar se a resposta não contém a mensagem de erro de permissão\", function () {\r",
+											"    const respostaJson = pm.response.json();\r",
+											"    pm.expect(respostaJson.msg).not.to.eql(\"Você não tem permissão para esta função.\");\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "apikey",
+									"apikey": [
+										{
+											"key": "in",
+											"value": "header",
+											"type": "string"
+										},
+										{
+											"key": "value",
+											"value": "{{TokenProvider}}",
+											"type": "string"
+										},
+										{
+											"key": "key",
+											"value": "Authorization",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"password\": \"12345Test\",\r\n  \"confirmPassword\": \"12345Tests\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{Url}}user/password/{{USER_ID}}",
+									"host": [
+										"{{Url}}user"
+									],
+									"path": [
+										"password",
+										"{{USER_ID}}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "3_Lista de cadastro de Login",
+			"item": [
+				{
+					"name": "CT3.2.1 - Validar paginação da lista - pagina 1 - 50 registros",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"\r",
+									"pm.test(\"Status code 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response tem 50 registros\", function () {\r",
+									"    const jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData).to.be.an(\"array\").with.lengthOf(50);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Registros estão ordenados por nomes em ordem alfabética\", function () {\r",
+									"    const jsonData = pm.response.json();\r",
+									"    let isSorted = true;\r",
+									"\r",
+									"    for (let i = 0; i < jsonData.length - 1; i++) {\r",
+									"        if (jsonData[i].fullName.localeCompare(jsonData[i + 1].fullName) > 0) {\r",
+									"            isSorted = false;\r",
+									"            break;\r",
+									"        }\r",
+									"    }\r",
+									"\r",
+									"    pm.expect(isSorted).to.be.true;\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "in",
+									"value": "header",
+									"type": "string"
+								},
+								{
+									"key": "value",
+									"value": "{{TokenProvider}}",
+									"type": "string"
+								},
+								{
+									"key": "key",
+									"value": "Authorization",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{Url}}user/?limit=50",
+							"host": [
+								"{{Url}}user"
+							],
+							"path": [
+								""
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "50"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CT3.2.2 - Validar paginação da lista - pagina 2 - 50 registros",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"\r",
+									"pm.test(\"Status code 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response tem 50 registros\", function () {\r",
+									"    const jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData).to.be.an(\"array\").with.lengthOf(50);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Registros estão ordenados por nomes em ordem alfabética\", function () {\r",
+									"    const jsonData = pm.response.json();\r",
+									"    let isSorted = true;\r",
+									"\r",
+									"    for (let i = 0; i < jsonData.length - 1; i++) {\r",
+									"        if (jsonData[i].fullName.localeCompare(jsonData[i + 1].fullName) > 0) {\r",
+									"            isSorted = false;\r",
+									"            break;\r",
+									"        }\r",
+									"    }\r",
+									"\r",
+									"    pm.expect(isSorted).to.be.true;\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "in",
+									"value": "header",
+									"type": "string"
+								},
+								{
+									"key": "value",
+									"value": "{{TokenProvider}}",
+									"type": "string"
+								},
+								{
+									"key": "key",
+									"value": "Authorization",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{Url}}user/?limit=50&page=2",
+							"host": [
+								"{{Url}}user"
+							],
+							"path": [
+								""
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "50"
+								},
+								{
+									"key": "page",
+									"value": "2"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "4_Excluir cadastro de Login",
+			"item": [
+				{
+					"name": "CN1: Validar exclusão de cadastro com sucesso",
+					"item": [
+						{
+							"name": "CT4.1.1: Exclusão de usuário com sucesso",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code 200 - OK\", function () {\r",
+											"  pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Mensagem de sucesso na resposta\", function () {\r",
+											"    var jsonData = pm.response.json();\r",
+											"    pm.expect(jsonData.msg).to.eql(\"Usuário deletado com sucesso!.\");\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "apikey",
+									"apikey": [
+										{
+											"key": "in",
+											"value": "header",
+											"type": "string"
+										},
+										{
+											"key": "value",
+											"value": "{{TokenProvider}}",
+											"type": "string"
+										},
+										{
+											"key": "key",
+											"value": "Authorization",
+											"type": "string"
+										}
+									]
+								},
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{Url}}user/{{USER_ID}}",
+									"host": [
+										"{{Url}}user"
+									],
+									"path": [
+										"{{USER_ID}}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "CN2: Validar exclusão de cadastro inválido",
+					"item": [
+						{
+							"name": "CT4.2.1: Exclusão de usuário inválido",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code 400 - Bad Request\", function () {\r",
+											"  pm.response.to.have.status(400);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Mensagem de sucesso na resposta\", function () {\r",
+											"    var jsonData = pm.response.json();\r",
+											"    pm.expect(jsonData.alert).to.eql(\"Esse usuário não existe em nossa base de dados.\");\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "apikey",
+									"apikey": [
+										{
+											"key": "in",
+											"value": "header",
+											"type": "string"
+										},
+										{
+											"key": "value",
+											"value": "{{TokenProvider}}",
+											"type": "string"
+										},
+										{
+											"key": "key",
+											"value": "Authorization",
+											"type": "string"
+										}
+									]
+								},
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{Url}}user/671e5c4ab8d32c9e73587058",
+									"host": [
+										"{{Url}}user"
+									],
+									"path": [
+										"671e5c4ab8d32c9e73587058"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					"function gerarNomeComposto() {\r",
+					"    const primeiros = [\"Alexandre\", \"Gabriel\", \"Marcos\", \"Ricardo\", \"Fernanda\", \"Juliana\", \"Carolina\", \"Patrícia\"];\r",
+					"    const sobrenomes = [\"Silva\", \"Santos\", \"Oliveira\", \"Pereira\", \"Albuquerque\", \"Costa\", \"Souza\", \"Monteiro\"];\r",
+					"    const sufixos = [\"Junior\", \"Neto\", \"Filho\", \"Sobrinho\", \"de Albuquerque\", \"da Silva\", \"dos Santos\"];\r",
+					"\r",
+					"    return `${primeiros[Math.floor(Math.random() * primeiros.length)]} ` +\r",
+					"           `${sobrenomes[Math.floor(Math.random() * sobrenomes.length)]} ` +\r",
+					"           `${sobrenomes[Math.floor(Math.random() * sobrenomes.length)]} ` +\r",
+					"           `${sufixos[Math.floor(Math.random() * sufixos.length)]}`;\r",
+					"}\r",
+					"\r",
+					"pm.environment.set(\"NOME_COMPOSTO\", gerarNomeComposto());\r",
+					"\r",
+					"function gerarCPF() {\r",
+					"    const base = Array.from({ length: 9 }, () => Math.floor(Math.random() * 10)).join('');\r",
+					"    const calcularDigito = (num) => {\r",
+					"        let soma = 0;\r",
+					"        for (let i = 0; i < num.length; i++) soma += parseInt(num.charAt(i)) * (num.length + 1 - i);\r",
+					"        return (soma % 11) < 2 ? 0 : 11 - (soma % 11);\r",
+					"    };\r",
+					"    const digito1 = calcularDigito(base);\r",
+					"    const digito2 = calcularDigito(base + digito1);\r",
+					"    return `${base}${digito1}${digito2}`;\r",
+					"}\r",
+					"\r",
+					"pm.environment.set(\"CPF\", gerarCPF());\r",
+					"\r",
+					"function gerarEmail() {\r",
+					"    const nomes = [\"test\", \"testando\", \"testing\", \"testee\", \"testest\"];\r",
+					"    const dominios = [\"gmail.com\", \"hotmail.com.br\", \"yahoo.com.br\", \"hotmail.com.br\", \"outlook.com\", \"outlook.com.br\"];\r",
+					"    const numero1 = Math.floor(Math.random() * 1000);\r",
+					"    const numero2 = Math.floor(Math.random() * 10000);\r",
+					"    \r",
+					"    const nomeAleatorio = nomes[Math.floor(Math.random() * nomes.length)];\r",
+					"    const dominioAleatorio = dominios[Math.floor(Math.random() * dominios.length)];\r",
+					"    \r",
+					"    return `${nomeAleatorio}${numero1}${numero2}@${dominioAleatorio}`;\r",
+					"}\r",
+					"\r",
+					"pm.environment.set(\"EMAIL\", gerarEmail());"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}
